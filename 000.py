@@ -24,12 +24,15 @@ def q_logarithm(x, q = 1):
         return (x**(1-q) - 1) / (1-q)
 
 def box_muller(n, q=1):
+    assert q<5/3
     J = -q_logarithm(np.random.rand(n), q)
+    J = J/np.std(J)
     phase = np.random.rand(n)
     rho = np.sqrt(2*J)
     x = rho * np.cos(2*np.pi*phase)
     px = rho * np.sin(2*np.pi*phase)
-    return x, px, J, rho, phase
+    beta = 1/np.std(x)**2/(5-3*q)
+    return x, px, J, rho, phase, beta
 
 
 # Define the q-exponential function
@@ -59,16 +62,16 @@ def q_gaussian(x, beta, q):
     return np.sqrt(beta) / Cq * q_exponential(-beta * x**2, q)
 # %% generate random numbers
 
-n = 10000000
+n = 1000000
 my_q = 1
-x, px, J, rho, phase = box_muller(n, q=my_q)
-plt.hist(x, bins=300, density=True)
-plt.hist(px, bins=300, density=True)
+x, px, J, rho, phase, beta = box_muller(n, q=my_q)
+plt.hist(x, bins=100, density=True)
+plt.hist(px, bins=100, density=True)
 my_x = np.linspace(-6, 6, 100)
 # map the q-gaussian on my_x
 print(np.std(x))    
 
-plt.plot(my_x, np.vectorize(q_gaussian)(my_x, q=my_q, beta=.5), 'r')
+plt.plot(my_x, np.vectorize(q_gaussian)(my_x, q=my_q, beta= beta), 'r')
 plt.xlim( [-6, 6])
 plt.show()
 # %%
@@ -89,10 +92,18 @@ plt.hist(J[idx], bins=1000, density=False)
 plt.hist(x[idx], bins=1000, density=False)
 # %%
 n = 10000000
-my_q = 1
-x, px, J, rho, phase = box_muller(n, q=my_q)
-idx = np.where(rho < 3.)
-print(1-len(idx[0])/n)
-idx = np.where( (x < 3.) & (x > -3.))
-print(1-len(idx[0])/n)
+my_q = 1.
+x, px, J, rho, phase, beta = box_muller(n, q=my_q)
+
+sigma_cut = 1
+idx = np.where(rho > sigma_cut)
+print(len(idx[0])/n)
+idx = np.where( (x > sigma_cut) | (x < -sigma_cut))
+print(len(idx[0])/n)
+# %%
+np.std(px)
+# %%
+J = -q_logarithm(np.random.rand(n), 1)
+J = J/np.std(J)
+np.std(J)
 # %%
