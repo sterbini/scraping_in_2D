@@ -92,7 +92,7 @@ plt.hist(J[idx], bins=1000, density=False)
 plt.hist(x[idx], bins=1000, density=False)
 # %%
 n = 10000000
-my_q = 1.
+my_q = 1
 x, px, J, rho, phase, beta = box_muller(n, q=my_q)
 
 sigma_cut = 1
